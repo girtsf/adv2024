@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 import dataclasses
+
 
 @dataclasses.dataclass(frozen=True)
 class Pos:
@@ -28,3 +30,12 @@ class Pos:
             Pos(self.y + 1, self.x),
             Pos(self.y - 1, self.x),
         ]
+
+    def orthogonal_neighbors_sized(self, map_size: Pos):
+        poses = [
+            Pos(self.y, self.x + 1),
+            Pos(self.y, self.x - 1),
+            Pos(self.y + 1, self.x),
+            Pos(self.y - 1, self.x),
+        ]
+        return [p for p in poses if 0 <= p.x < map_size.x and 0 <= p.y < map_size.y]
