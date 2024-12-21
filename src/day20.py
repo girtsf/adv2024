@@ -51,51 +51,46 @@ class Map:
                 queue.append((neighbor, steps + 1))
         return dist
 
-    def find_cheats(self):
+    def find_cheats(self, cheat_time: int) -> dict[int, int]:
         fwd = self.flood_fill(self.start)
-        normal_time = fwd[self.end]
-        print(f"{normal_time=}")
-
         back = self.flood_fill(self.end)
-        cheats = []
+        assert back[self.start] == fwd[self.end]
+        cheats_by_time_saved = collections.defaultdict(int)
         for y in range(self.size.y):
             for x in range(self.size.x):
-                pos = Pos(y, x)
-                if pos not in self.walls:
+                start_pos = Pos(y, x)
+                if start_pos not in fwd:
                     continue
-                for from_pos in pos.orthogonal_neighbors_sized(self.size):
-                    if from_pos not in fwd:
-                        continue
-                    for to_pos in pos.orthogonal_neighbors_sized(self.size):
-                        if to_pos not in back:
+
+                for end_y in range(-cheat_time, cheat_time + 1):
+                    for end_x in range(-cheat_time, cheat_time + 1):
+                        steps = abs(end_y) + abs(end_x)
+                        if steps > cheat_time:
                             continue
-                        if to_pos == from_pos:
+                        end_pos = start_pos + Pos(end_y, end_x)
+                        if end_pos not in back:
                             continue
-                        cheat_time = fwd[from_pos] + back[to_pos] + 2
-                        if cheat_time >= normal_time:
+                        time_saved = fwd[self.end] - (
+                            fwd[start_pos] + steps + back[end_pos]
+                        )
+                        if time_saved <= 0:
                             continue
-                        time_saved = normal_time - cheat_time
-                        cheats.append((from_pos, to_pos, time_saved))
-        return cheats
+                        cheats_by_time_saved[time_saved] += 1
+
+        return cheats_by_time_saved
+
+    def solve(self, cheat_time: int) -> int:
+        cheats = self.find_cheats(cheat_time)
+        # for t, count in sorted(cheats.items()):
+        #     if t >= 50:
+        #         print(f"{t=}, {count=}")
+        return sum(v for k, v in cheats.items() if k >= 100)
 
 
 def main(p: pathlib.Path) -> None:
     map = Map.parse(p.read_text().strip())
-    print(map)
-    cheats = map.find_cheats()
-
-    # Part 1.
-    part1 = 0
-    for _, _, time_saved in cheats:
-        if time_saved >= 100:
-            part1 += 1
-    print(f"Part 1: {part1}")
-
-    # by_time = {}
-    # for _, _, time_saved in cheats:
-    #     by_time.setdefault(time_saved, 0)
-    #     by_time[time_saved] += 1
-    # print(by_time)
+    print(f"part1: {map.solve(2)}")
+    print(f"part2: {map.solve(20)}")
 
 
 if __name__ == "__main__":
