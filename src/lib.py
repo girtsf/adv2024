@@ -39,3 +39,6 @@ class Pos:
             Pos(self.y - 1, self.x),
         ]
         return [p for p in poses if 0 <= p.x < map_size.x and 0 <= p.y < map_size.y]
+
+    def manhattan_distance(self, other: Pos) -> int:
+        return abs(self.x - other.x) + abs(self.y - other.y)
