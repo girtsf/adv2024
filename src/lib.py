@@ -11,6 +11,9 @@ class Pos:
     def __add__(self, other):
         return Pos(self.y + other.y, self.x + other.x)
 
+    def __sub__(self, other):
+        return Pos(self.y - other.y, self.x - other.x)
+
     def top(self) -> Pos:
         return Pos(self.y - 1, self.x)
 
